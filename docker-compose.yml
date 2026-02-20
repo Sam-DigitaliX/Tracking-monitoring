@@ -21,11 +21,18 @@ services:
     environment:
       DATABASE_URL: "postgresql+asyncpg://trackguard:trackguard@db:5432/trackguard"
       APP_ENV: "production"
-    volumes:
-      - ./backend/app:/app/app
-      - ./backend/alembic:/app/alembic
-      - ./backend/alembic.ini:/app/alembic.ini
-      - ./backend/entrypoint.sh:/entrypoint.sh
+    command:
+      - sh
+      - -c
+      - |
+        echo "=== TrackGuard Debug ==="
+        echo "PWD: $$(pwd)"
+        echo "Files in /app/app/:"
+        ls -la /app/app/ 2>&1 || echo "ERROR: /app/app/ not found"
+        echo "Python import test:"
+        python -c "import app.main; print('OK: import successful')" 2>&1 || { echo "FATAL: import failed"; exit 1; }
+        echo "Starting uvicorn..."
+        exec uvicorn app.main:app --host 0.0.0.0 --port 8000
     depends_on:
       db:
         condition: service_healthy

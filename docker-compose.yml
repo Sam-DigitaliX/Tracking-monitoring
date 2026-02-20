@@ -20,19 +20,8 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: "postgresql+asyncpg://trackguard:trackguard@db:5432/trackguard"
+      PYTHONPATH: /app
       APP_ENV: "production"
-    command:
-      - sh
-      - -c
-      - |
-        echo "=== TrackGuard Debug ==="
-        echo "PWD: $$(pwd)"
-        echo "Files in /app/app/:"
-        ls -la /app/app/ 2>&1 || echo "ERROR: /app/app/ not found"
-        echo "Python import test:"
-        python -c "import app.main; print('OK: import successful')" 2>&1 || { echo "FATAL: import failed"; exit 1; }
-        echo "Starting uvicorn..."
-        exec uvicorn app.main:app --host 0.0.0.0 --port 8000
     depends_on:
       db:
         condition: service_healthy

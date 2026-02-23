@@ -65,7 +65,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen">
       {/* ── Navbar ────────────────────────────────────── */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/40 bg-white/40 backdrop-blur-xl shadow-[inset_0_-1px_0_hsl(0_0%_100%/0.2)]">
+      <nav className="fixed top-0 inset-x-0 z-50 border-b border-glass-border bg-glass backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
@@ -97,12 +97,12 @@ export default function LandingPage() {
       <section className="relative pt-32 pb-20 overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-20 left-1/4 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute top-40 right-1/4 h-64 w-64 rounded-full bg-secondary/5 blur-3xl" />
+          <div className="absolute top-20 left-1/4 h-72 w-72 rounded-full bg-[hsl(262_83%_80%/0.12)] blur-3xl" />
+          <div className="absolute top-40 right-1/4 h-64 w-64 rounded-full bg-[hsl(188_94%_80%/0.08)] blur-3xl" />
         </div>
 
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-medium text-primary mb-8 animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 shadow-sm px-4 py-1.5 text-xs font-medium text-primary mb-8 animate-fade-in-up">
             <Zap className="h-3.5 w-3.5" />
             Monitoring for tracking infrastructure
           </div>
@@ -122,14 +122,14 @@ export default function LandingPage() {
           <div className="flex items-center justify-center gap-4 mt-10 animate-fade-in-up animate-delay-300">
             <Link
               href="/signup"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 transition-all"
+              className="ev-btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold shadow-lg shadow-primary/25"
             >
               Start Monitoring
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/50 bg-white/50 backdrop-blur-md px-6 py-3 text-sm font-semibold text-foreground shadow-glass hover:bg-white/70 transition-all"
+              className="inline-flex items-center gap-2 rounded-xl border border-black/[0.08] bg-white px-6 py-3 text-sm font-semibold text-foreground shadow-sm hover:bg-muted/50 transition-all"
             >
               Log in to Dashboard
             </Link>
@@ -138,7 +138,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Stats ─────────────────────────────────────── */}
-      <section className="border-y border-white/40 bg-white/30 backdrop-blur-lg">
+      <section className="border-y border-border bg-glass backdrop-blur-lg">
         <div className="mx-auto max-w-4xl px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
@@ -175,7 +175,7 @@ export default function LandingPage() {
                 key={feature.title}
                 className={`glass-card p-6 transition-all duration-300 animate-fade-in-up animate-delay-${((i % 6) + 1) * 100}`}
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/[0.06] border border-primary/[0.08] mb-4">
                   <feature.icon className="h-5.5 w-5.5 text-primary" />
                 </div>
                 <h3 className="font-semibold mb-2">{feature.title}</h3>
@@ -189,7 +189,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ──────────────────────────────── */}
-      <section className="py-24 bg-white/20 backdrop-blur-sm">
+      <section className="py-24 bg-muted/30">
         <div className="mx-auto max-w-4xl px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight">
@@ -220,7 +220,7 @@ export default function LandingPage() {
               },
             ].map((item) => (
               <div key={item.step} className="text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg mb-4">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold text-lg mb-4 shadow-glow-primary">
                   {item.step}
                 </div>
                 <h3 className="font-semibold mb-2">{item.title}</h3>
@@ -236,7 +236,7 @@ export default function LandingPage() {
       {/* ── CTA ───────────────────────────────────────── */}
       <section className="py-24">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <div className="rounded-2xl border border-white/50 bg-white/40 backdrop-blur-xl p-12 shadow-glass">
+          <div className="glass-card p-12">
             <Globe className="h-10 w-10 text-primary mx-auto mb-6" />
             <h2 className="text-3xl font-bold tracking-tight mb-4">
               Ready to protect your tracking?
@@ -247,7 +247,7 @@ export default function LandingPage() {
             </p>
             <Link
               href="/signup"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all"
+              className="ev-btn-primary inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold shadow-lg shadow-primary/25"
             >
               Get Started Free
               <ArrowRight className="h-4 w-4" />
@@ -257,7 +257,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ────────────────────────────────────── */}
-      <footer className="border-t border-white/40 py-8">
+      <footer className="border-t border-border py-8">
         <div className="mx-auto max-w-6xl px-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-secondary">

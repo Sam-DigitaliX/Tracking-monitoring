@@ -74,7 +74,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right panel — login form */}
-      <div className="flex w-full lg:w-1/2 items-center justify-center px-6 py-12 bg-white/10 backdrop-blur-sm">
+      <div className="flex w-full lg:w-1/2 items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-10 lg:hidden">
@@ -105,7 +105,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full rounded-lg border border-white/50 bg-white/40 backdrop-blur-md pl-10 pr-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring/15 focus:border-primary/40 focus:bg-white/60 transition-all"
+                  className="ev-input w-full pl-10 pr-4 py-2.5 text-sm placeholder:text-muted-foreground/60"
                   required
                 />
               </div>
@@ -120,7 +120,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full rounded-lg border border-white/50 bg-white/40 backdrop-blur-md pl-10 pr-10 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring/15 focus:border-primary/40 focus:bg-white/60 transition-all"
+                  className="ev-input w-full pl-10 pr-10 py-2.5 text-sm placeholder:text-muted-foreground/60"
                   required
                 />
                 <button
@@ -136,7 +136,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="ev-btn-primary w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="h-4 w-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />

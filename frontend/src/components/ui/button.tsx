@@ -16,7 +16,7 @@ const buttonVariants = cva(
         gradient:
           "bg-gradient-to-r from-primary to-secondary text-white font-bold tracking-wide shadow-lg hover:opacity-90 hover:shadow-xl",
         glass:
-          "bg-glass border border-glass-border backdrop-blur-xl text-foreground hover:border-primary/20 font-medium",
+          "bg-white/60 border border-black/[0.10] backdrop-blur-xl text-foreground hover:border-primary/20 font-medium",
       },
       size: {
         default: "h-10 px-4 py-2",

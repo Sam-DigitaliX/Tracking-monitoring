@@ -65,7 +65,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen">
       {/* ── Navbar ────────────────────────────────────── */}
-      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl border-b border-black/[0.06]">
+      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
@@ -77,7 +77,7 @@ export default function LandingPage() {
           </Link>
 
           {/* Nav pill (desktop) */}
-          <div className="hidden md:flex items-center rounded-full border border-black/[0.08] bg-black/[0.04] px-1 py-1">
+          <div className="hidden md:flex items-center rounded-full border border-white/[0.12] bg-white/[0.07] px-1 py-1">
             <Link
               href="/"
               className="px-4 py-2 rounded-full text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
@@ -118,13 +118,13 @@ export default function LandingPage() {
 
       {/* ── Hero — Glass Panel Bottom ──────────────────── */}
       <div className="mx-3 md:mx-6">
-        <section className="relative pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden rounded-b-[40px] bg-white/40 backdrop-blur-xl border border-[hsl(262_40%_50%/0.10)] border-t-0 shadow-[0_4px_40px_hsl(262_40%_30%/0.06)]">
+        <section className="relative pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden rounded-b-[40px] bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] border-t-0">
           {/* Internal gradient overlay */}
           <div
             className="absolute inset-0 rounded-b-[40px]"
             style={{
               background:
-                "linear-gradient(180deg, hsl(262 83% 58% / 0.10) 0%, hsl(262 83% 58% / 0.04) 40%, transparent 70%)",
+                "linear-gradient(180deg, hsl(262 83% 58% / 0.12) 0%, hsl(262 83% 58% / 0.05) 40%, transparent 70%)",
             }}
           />
 
@@ -142,7 +142,7 @@ export default function LandingPage() {
             {/* Animated badge with pulsing dot */}
             <div className="relative inline-flex mb-8 animate-fade-in-up">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-md" />
-              <div className="relative inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow-sm border border-primary/20 backdrop-blur-sm">
+              <div className="relative inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/60 border border-primary/30 backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 <span className="text-sm font-medium text-gradient-primary">
                   Monitoring for tracking infrastructure
@@ -173,7 +173,7 @@ export default function LandingPage() {
               </Link>
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 rounded-xl border border-black/[0.08] bg-white px-6 py-3 text-sm font-semibold text-foreground shadow-sm hover:bg-muted/50 transition-all"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.05] px-6 py-3 text-sm font-semibold text-foreground hover:bg-white/[0.08] transition-all"
               >
                 Log in to Dashboard
               </Link>
@@ -201,8 +201,8 @@ export default function LandingPage() {
               <span className="text-sm text-muted-foreground">–</span>
               <span className="text-sm text-muted-foreground">32 avis</span>
               <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25">
-                <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="text-xs font-medium text-emerald-600">
+                <BadgeCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-xs font-medium text-emerald-400">
                   Verified
                 </span>
               </div>
@@ -328,7 +328,7 @@ export default function LandingPage() {
       {/* ── CTA — Glass Panel Top + Fade-to-Footer ────── */}
       <div className="relative mx-4 md:mx-8 mt-16">
         <div
-          className="relative rounded-t-[40px] pt-16 md:pt-24 px-4 md:px-8 lg:px-20 pb-20 md:pb-28 bg-white/40 backdrop-blur-xl border border-[hsl(262_40%_50%/0.10)] border-b-0 shadow-[0_-4px_40px_hsl(262_40%_30%/0.06)]"
+          className="relative rounded-t-[40px] pt-16 md:pt-24 px-4 md:px-8 lg:px-20 pb-20 md:pb-28 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] border-b-0"
           style={{
             maskImage:
               "linear-gradient(to bottom, black calc(100% - 60px), transparent)",
@@ -341,7 +341,7 @@ export default function LandingPage() {
             className="absolute inset-x-0 top-0 h-px rounded-t-[40px]"
             style={{
               background:
-                "linear-gradient(90deg, transparent, hsl(262 83% 58% / 0.30) 30%, hsl(262 83% 58% / 0.40) 50%, hsl(262 83% 58% / 0.30) 70%, transparent)",
+                "linear-gradient(90deg, transparent, hsl(262 83% 58% / 0.3) 30%, hsl(262 83% 58% / 0.4) 50%, hsl(262 83% 58% / 0.3) 70%, transparent)",
             }}
           />
 

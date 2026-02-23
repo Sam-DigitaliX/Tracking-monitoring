@@ -22,9 +22,6 @@ interface Particle {
   opacity: number;
   life: number;
   maxLife: number;
-  char: string;
-  rotation: number;
-  rotSpeed: number;
 }
 
 interface AmbientDot {
@@ -53,18 +50,16 @@ interface MetalTheme {
 
 const CARD_W = 320;
 const CARD_H = 180;
-const GAP = 260;
-const SCROLL_SPEED = 0.6;
-const MAX_PARTICLES = 400;
-const AMBIENT_COUNT = 70;
+const GAP = 140;
+const SCROLL_SPEED = 0.9;
+const MAX_PARTICLES = 180;
+const AMBIENT_COUNT = 35;
 
 /* Particle colour — soft purple-white */
 const P_R = 190;
 const P_G = 170;
 const P_B = 255;
 
-const SCATTER_CHARS =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$!=+<>{}[]|@&*";
 const GRID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$!=+.:·";
 
 /* ── Themes ───────────────────────────────────────────── */
@@ -180,10 +175,6 @@ const CARDS: ExpertiseCard[] = [
    Helpers
    ═══════════════════════════════════════════════════════════════════ */
 
-function randomChar(): string {
-  return SCATTER_CHARS[Math.floor(Math.random() * SCATTER_CHARS.length)];
-}
-
 /* Seeded RNG for deterministic grids per card */
 function seededRng(seed: number): () => number {
   let s = seed;
@@ -195,7 +186,7 @@ function seededRng(seed: number): () => number {
 
 interface GridCell {
   char: string;
-  bold: boolean;
+  bright: boolean;
 }
 
 function generateGrid(
@@ -207,16 +198,16 @@ function generateGrid(
   return Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
       char: GRID_CHARS[Math.floor(rng() * GRID_CHARS.length)],
-      bold: rng() < 0.07,
+      bright: rng() < 0.06,
     })),
   );
 }
 
 /* Pre-generate 8 unique grids (one per card) */
-const GRIDS = CARDS.map((_, i) => generateGrid(i * 137, 17, 28));
+const GRIDS = CARDS.map((_, i) => generateGrid(i * 137, 16, 30));
 
 /* ═══════════════════════════════════════════════════════════════════
-   AsciiReveal — Random character grid (Evervault-style)
+   AsciiReveal — transparent background, no line numbers
    ═══════════════════════════════════════════════════════════════════ */
 
 function AsciiReveal({ gridIndex }: { gridIndex: number }) {
@@ -227,10 +218,9 @@ function AsciiReveal({ gridIndex }: { gridIndex: number }) {
       style={{
         position: "absolute",
         inset: 0,
-        background: "#06060f",
         borderRadius: 14,
         overflow: "hidden",
-        padding: "8px 6px",
+        padding: "6px 6px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -243,21 +233,19 @@ function AsciiReveal({ gridIndex }: { gridIndex: number }) {
           style={{
             fontFamily: "monospace",
             fontSize: 10,
-            lineHeight: "10.2px",
-            letterSpacing: "0.14em",
+            lineHeight: "10.6px",
+            letterSpacing: "0.12em",
             whiteSpace: "nowrap",
-            color: `rgba(${P_R},${P_G},${P_B},${0.25 + (r % 3) * 0.08})`,
+            color: `rgba(${P_R},${P_G},${P_B},${0.18 + (r % 3) * 0.06})`,
           }}
         >
           {row.map((cell, c) => (
             <span
               key={c}
               style={
-                cell.bold
+                cell.bright
                   ? {
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: `rgba(255,255,255,0.6)`,
+                      color: `rgba(255,255,255,0.45)`,
                     }
                   : undefined
               }
@@ -463,24 +451,23 @@ export default function CardBeamSection() {
 
       /* ── 1. Ambient floating particles ─────────────── */
 
-      /* Lazy init */
       if (ambientRef.current.length === 0 && sectionW > 0) {
         ambientRef.current = Array.from({ length: AMBIENT_COUNT }, () => ({
           x: Math.random() * sectionW,
           y: Math.random() * sectionH,
-          vx: 0.4 + Math.random() * 1.8,
-          vy: (Math.random() - 0.5) * 0.25,
-          size: 0.8 + Math.random() * 2.2,
-          baseOpacity: 0.12 + Math.random() * 0.28,
+          vx: 0.5 + Math.random() * 2.0,
+          vy: (Math.random() - 0.5) * 0.3,
+          size: 0.6 + Math.random() * 1.8,
+          baseOpacity: 0.1 + Math.random() * 0.22,
           phase: Math.random() * Math.PI * 2,
         }));
       }
 
-      for (const dot of ambientRef.current) {
+      for (let i = 0; i < ambientRef.current.length; i++) {
+        const dot = ambientRef.current[i];
         dot.x += dot.vx;
         dot.y += dot.vy;
 
-        /* Wrap */
         if (dot.x > sectionW + 30) {
           dot.x = -30;
           dot.y = Math.random() * sectionH;
@@ -488,11 +475,10 @@ export default function CardBeamSection() {
         if (dot.y < -10) dot.y = sectionH + 10;
         if (dot.y > sectionH + 10) dot.y = -10;
 
-        /* Brighter near beam */
         const distFromBeam = Math.abs(dot.x - beamX);
-        const beamProximity = Math.max(0, 1 - distFromBeam / 300);
-        const pulse = 0.6 + 0.4 * Math.sin(now / 1800 + dot.phase);
-        const alpha = dot.baseOpacity * pulse + beamProximity * 0.15;
+        const beamProximity = Math.max(0, 1 - distFromBeam / 250);
+        const pulse = 0.6 + 0.4 * Math.sin(now / 2000 + dot.phase);
+        const alpha = dot.baseOpacity * pulse + beamProximity * 0.12;
 
         ctx.fillStyle = `rgba(${P_R},${P_G},${P_B},${alpha})`;
         ctx.beginPath();
@@ -504,10 +490,8 @@ export default function CardBeamSection() {
 
       const idlePulse = 0.5 + 0.5 * Math.sin(now / 2200);
 
-      /* Deep violet radial glow (elliptical, wider in middle) */
       ctx.save();
       ctx.translate(beamX, sectionH / 2);
-      /* Scale Y to stretch a circular gradient into a vertical ellipse */
       ctx.scale(1, (sectionH * 0.6) / 100);
       const glowR = 60 + intensity * 50;
       const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, glowR);
@@ -547,14 +531,14 @@ export default function CardBeamSection() {
       ctx.lineTo(beamX, sectionH);
       ctx.stroke();
 
-      /* Extra glow line during scanning */
-      if (intensity > 0.1) {
+      /* Extra glow during scanning */
+      if (intensity > 0.15) {
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
-        ctx.shadowColor = `rgba(${P_R},${P_G},${P_B},${intensity * 0.5})`;
-        ctx.shadowBlur = 20 + intensity * 30;
-        ctx.strokeStyle = `rgba(${P_R},${P_G},${P_B},${intensity * 0.08})`;
-        ctx.lineWidth = 8 + intensity * 10;
+        ctx.shadowColor = `rgba(${P_R},${P_G},${P_B},${intensity * 0.4})`;
+        ctx.shadowBlur = 15 + intensity * 20;
+        ctx.strokeStyle = `rgba(${P_R},${P_G},${P_B},${intensity * 0.06})`;
+        ctx.lineWidth = 6 + intensity * 8;
         ctx.beginPath();
         ctx.moveTo(beamX, 0);
         ctx.lineTo(beamX, sectionH);
@@ -562,7 +546,7 @@ export default function CardBeamSection() {
         ctx.restore();
       }
 
-      /* ── 4. Scan particles + char particles ────────── */
+      /* ── 4. Scan particles — luminous dots only ────── */
 
       const pool = particlesRef.current;
       for (let i = 0; i < pool.length; i++) {
@@ -571,60 +555,42 @@ export default function CardBeamSection() {
 
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.008;
-        p.vx *= 0.997;
+        p.vy += 0.006;
+        p.vx *= 0.998;
         p.life -= 1;
 
-        /* Smooth fade in + fade out */
         const t = p.life / p.maxLife;
-        p.opacity = t > 0.85 ? (1 - t) / 0.15 : t < 0.25 ? t / 0.25 : 1;
-        p.opacity *= 0.65;
-        p.rotation += p.rotSpeed;
+        p.opacity = t > 0.85 ? (1 - t) / 0.15 : t < 0.3 ? t / 0.3 : 1;
+        p.opacity *= 0.7;
 
-        if (p.char) {
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate(p.rotation);
-          ctx.font = `${p.size}px monospace`;
-          ctx.fillStyle = `rgba(${P_R},${P_G},${P_B},${p.opacity})`;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(p.char, 0, 0);
-          ctx.restore();
-        } else {
-          ctx.fillStyle = `rgba(${P_R},${P_G},${P_B},${p.opacity})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        ctx.fillStyle = `rgba(${P_R},${P_G},${P_B},${p.opacity})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
       }
     },
     [],
   );
 
-  /* ── Emit particles at scan edge ────────────────────── */
+  /* ── Emit particles at scan edge — fine luminous dots ── */
 
   const emitParticles = useCallback(
     (x: number, yMin: number, yMax: number) => {
       const pool = particlesRef.current;
       let emitted = 0;
-      for (let i = 0; i < pool.length && emitted < 7; i++) {
+      for (let i = 0; i < pool.length && emitted < 5; i++) {
         if (pool[i].life > 0) continue;
 
-        const isChar = Math.random() < 0.5;
-        const maxLife = 30 + Math.random() * 55;
+        const maxLife = 25 + Math.random() * 40;
         pool[i] = {
-          x: x + (Math.random() - 0.5) * 6,
+          x: x + (Math.random() - 0.5) * 4,
           y: yMin + Math.random() * (yMax - yMin),
-          vx: -0.5 + Math.random() * 3,
-          vy: (Math.random() - 0.5) * 2,
-          size: isChar ? 8 + Math.random() * 14 : 1 + Math.random() * 2.5,
+          vx: -0.3 + Math.random() * 2.5,
+          vy: (Math.random() - 0.5) * 1.8,
+          size: 0.4 + Math.random() * 1.6,
           opacity: 0,
           life: maxLife,
           maxLife,
-          char: isChar ? randomChar() : "",
-          rotation: Math.random() * Math.PI * 2,
-          rotSpeed: (Math.random() - 0.5) * 0.06,
         };
         emitted++;
       }
@@ -739,9 +705,6 @@ export default function CardBeamSection() {
       opacity: 0,
       life: 0,
       maxLife: 1,
-      char: "",
-      rotation: 0,
-      rotSpeed: 0,
     }));
 
     const observer = new IntersectionObserver(
@@ -803,7 +766,7 @@ export default function CardBeamSection() {
         className="absolute inset-y-0 left-0 pointer-events-none"
         style={{
           zIndex: 15,
-          width: "22%",
+          width: "20%",
           background:
             "linear-gradient(90deg, hsl(240 15% 6%) 0%, hsl(240 15% 6% / 0.7) 35%, transparent 100%)",
         }}
@@ -812,7 +775,7 @@ export default function CardBeamSection() {
         className="absolute inset-y-0 right-0 pointer-events-none"
         style={{
           zIndex: 15,
-          width: "22%",
+          width: "20%",
           background:
             "linear-gradient(270deg, hsl(240 15% 6%) 0%, hsl(240 15% 6% / 0.7) 35%, transparent 100%)",
         }}
@@ -830,9 +793,9 @@ export default function CardBeamSection() {
             <div
               key={i}
               className="relative shrink-0"
-              style={{ width: CARD_W, height: CARD_H, willChange: "transform" }}
+              style={{ width: CARD_W, height: CARD_H }}
             >
-              {/* Code layer */}
+              {/* Code layer — transparent background */}
               <div
                 ref={(el) => {
                   codeLayerRefs.current[i] = el;
@@ -848,18 +811,6 @@ export default function CardBeamSection() {
                 }}
               >
                 <AsciiReveal gridIndex={i % CARDS.length} />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    width: 1,
-                    background: `rgba(${P_R},${P_G},${P_B},0.35)`,
-                    boxShadow: `0 0 6px rgba(${P_R},${P_G},${P_B},0.2)`,
-                    pointerEvents: "none",
-                  }}
-                />
               </div>
 
               {/* Metal layer */}

@@ -8,8 +8,8 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     <select
       ref={ref}
       className={cn(
-        "flex h-10 w-full rounded-lg border border-white/50 bg-white/40 backdrop-blur-md px-3 py-2 text-sm transition-all",
-        "focus:outline-none focus:ring-2 focus:ring-ring/15 focus:border-primary/40 focus:bg-white/60",
+        "flex h-10 w-full rounded-lg border border-glass-border bg-card backdrop-blur-md px-3 py-2 text-sm transition-all",
+        "focus:outline-none focus:border-primary/50 focus:shadow-[0_0_0_3px_hsl(262_83%_58%/0.08),0_0_20px_hsl(262_83%_58%/0.04)]",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}

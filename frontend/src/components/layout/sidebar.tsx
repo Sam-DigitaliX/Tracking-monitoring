@@ -31,14 +31,13 @@ export function Sidebar() {
     <aside
       className={cn(
         "fixed inset-y-0 left-0 z-30 flex flex-col",
-        "bg-sidebar backdrop-blur-xl border-r border-sidebar-border",
-        "shadow-[inset_-1px_0_0_hsl(0_0%_100%/0.15),4px_0_24px_hsl(0_0%_0%/0.04)]",
-        "transition-all duration-300",
+        "bg-glass backdrop-blur-xl border-r border-glass-border",
+        "shadow-card transition-all duration-300",
         collapsed ? "w-[68px]" : "w-[240px]"
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
+      <div className="flex h-16 items-center gap-3 border-b border-border px-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/20">
           <Shield className="h-5 w-5 text-white" />
         </div>
@@ -68,8 +67,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-white/60 text-sidebar-primary shadow-sm backdrop-blur-sm border border-white/50"
-                  : "text-sidebar-foreground hover:bg-white/30 hover:text-sidebar-accent-foreground hover:backdrop-blur-sm"
+                  ? "bg-sidebar-accent text-sidebar-primary shadow-sm border border-black/[0.04]"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
             >
               <item.icon
@@ -85,10 +84,10 @@ export function Sidebar() {
       </nav>
 
       {/* Collapse toggle */}
-      <div className="border-t border-sidebar-border p-3">
+      <div className="border-t border-border p-3">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex w-full items-center justify-center rounded-xl p-2 text-muted-foreground hover:bg-white/40 hover:text-sidebar-accent-foreground transition-all"
+          className="flex w-full items-center justify-center rounded-xl p-2 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />

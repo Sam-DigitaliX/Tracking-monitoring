@@ -30,9 +30,15 @@ TOKEN_ID="${2:?Usage: $0 <BOOKSTACK_URL> <TOKEN_ID> <TOKEN_SECRET> [--lang fr|en
 TOKEN_SECRET="${3:?Usage: $0 <BOOKSTACK_URL> <TOKEN_ID> <TOKEN_SECRET> [--lang fr|en]}"
 
 # --- Language ---
+# Supports: --lang en, --lang=en, en (as 4th arg)
 LANG_OPT="fr"
-if [[ "${4:-}" == "--lang" ]]; then
+ARG4="${4:-}"
+if [[ "$ARG4" == "--lang" ]]; then
   LANG_OPT="${5:-fr}"
+elif [[ "$ARG4" == --lang=* ]]; then
+  LANG_OPT="${ARG4#--lang=}"
+elif [[ "$ARG4" == "en" || "$ARG4" == "fr" ]]; then
+  LANG_OPT="$ARG4"
 fi
 
 if [[ "$LANG_OPT" != "fr" && "$LANG_OPT" != "en" ]]; then
@@ -60,6 +66,11 @@ fi
 
 # --- i18n strings ---
 if [[ "$LANG_OPT" == "en" ]]; then
+  # Book names
+  BOOK1_NAME="Getting Started"
+  BOOK2_NAME="GTM Listener"
+  BOOK3_NAME="API Reference"
+  BOOK4_NAME="Troubleshooting"
   # Book descriptions
   BOOK1_DESC="Discover Probr and set up monitoring in minutes."
   BOOK2_DESC="Configuration and advanced options for the Probr Server-Side Listener tag."
@@ -100,6 +111,11 @@ if [[ "$LANG_OPT" == "en" ]]; then
   MSG_ACCESS="Access your documentation"
   MSG_LANG_LABEL="Language: English"
 else
+  # Book names
+  BOOK1_NAME="Pour commencer"
+  BOOK2_NAME="GTM Listener"
+  BOOK3_NAME="Reference API"
+  BOOK4_NAME="Depannage"
   # Book descriptions
   BOOK1_DESC="Decouvrez Probr et installez le monitoring en quelques minutes."
   BOOK2_DESC="Configuration et options avancees du tag Probr Server-Side Listener."
@@ -226,9 +242,9 @@ echo ""
 # =============================================================================
 # Book 1: Getting Started
 # =============================================================================
-echo "[1/4] ${MSG_CREATING_BOOK}: Getting Started..."
+echo "[1/4] ${MSG_CREATING_BOOK}: ${BOOK1_NAME}..."
 
-result=$(create_book "Getting Started" "$BOOK1_DESC")
+result=$(create_book "$BOOK1_NAME" "$BOOK1_DESC")
 book1_id=$(extract_id "$result")
 echo "  ${MSG_BOOK_CREATED} (id: ${book1_id})"
 
@@ -251,9 +267,9 @@ echo ""
 # =============================================================================
 # Book 2: GTM Listener
 # =============================================================================
-echo "[2/4] ${MSG_CREATING_BOOK}: GTM Listener..."
+echo "[2/4] ${MSG_CREATING_BOOK}: ${BOOK2_NAME}..."
 
-result=$(create_book "GTM Listener" "$BOOK2_DESC")
+result=$(create_book "$BOOK2_NAME" "$BOOK2_DESC")
 book2_id=$(extract_id "$result")
 echo "  ${MSG_BOOK_CREATED} (id: ${book2_id})"
 
@@ -283,9 +299,9 @@ echo ""
 # =============================================================================
 # Book 3: API Reference
 # =============================================================================
-echo "[3/4] ${MSG_CREATING_BOOK}: API Reference..."
+echo "[3/4] ${MSG_CREATING_BOOK}: ${BOOK3_NAME}..."
 
-result=$(create_book "API Reference" "$BOOK3_DESC")
+result=$(create_book "$BOOK3_NAME" "$BOOK3_DESC")
 book3_id=$(extract_id "$result")
 echo "  ${MSG_BOOK_CREATED} (id: ${book3_id})"
 
@@ -315,9 +331,9 @@ echo ""
 # =============================================================================
 # Book 4: Troubleshooting
 # =============================================================================
-echo "[4/4] ${MSG_CREATING_BOOK}: Troubleshooting..."
+echo "[4/4] ${MSG_CREATING_BOOK}: ${BOOK4_NAME}..."
 
-result=$(create_book "Troubleshooting" "$BOOK4_DESC")
+result=$(create_book "$BOOK4_NAME" "$BOOK4_DESC")
 book4_id=$(extract_id "$result")
 echo "  ${MSG_BOOK_CREATED} (id: ${book4_id})"
 
@@ -341,10 +357,10 @@ echo "  ${MSG_IMPORT_DONE}"
 echo "==========================================="
 echo ""
 echo "  ${MSG_BOOKS_CREATED}"
-echo "    - Getting Started    (id: ${book1_id})"
-echo "    - GTM Listener       (id: ${book2_id})"
-echo "    - API Reference      (id: ${book3_id})"
-echo "    - Troubleshooting    (id: ${book4_id})"
+echo "    - ${BOOK1_NAME}  (id: ${book1_id})"
+echo "    - ${BOOK2_NAME}  (id: ${book2_id})"
+echo "    - ${BOOK3_NAME}  (id: ${book3_id})"
+echo "    - ${BOOK4_NAME}  (id: ${book4_id})"
 echo ""
 echo "  ${MSG_PAGES_IMPORTED}"
 echo ""

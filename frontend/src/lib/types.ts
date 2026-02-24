@@ -32,6 +32,7 @@ export interface Site {
   ga4_ids: string[];
   bigquery_ids: string[];
   cmp_provider: string | null;
+  ingest_key: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -154,4 +155,54 @@ export interface ProbeUpdate {
   config?: Record<string, unknown>;
   interval_seconds?: number;
   is_active?: boolean;
+}
+
+/* ── Monitoring (Probr Listener) ──────────────── */
+
+export interface TagHealthSummary {
+  tag_name: string;
+  total_executions: number;
+  success_count: number;
+  failure_count: number;
+  success_rate: number;
+  avg_execution_time_ms: number;
+}
+
+export interface EventVolumeSummary {
+  event_name: string;
+  total_count: number;
+  trend_pct: number | null;
+}
+
+export interface UserDataQualitySummary {
+  email_rate: number;
+  phone_rate: number;
+  address_rate: number;
+  total_events: number;
+}
+
+export interface MonitoringOverview {
+  site_id: string;
+  site_name: string;
+  container_id: string | null;
+  period_hours: number;
+  total_events: number;
+  events: EventVolumeSummary[];
+  tags: TagHealthSummary[];
+  user_data: UserDataQualitySummary | null;
+  last_seen: string | null;
+}
+
+export interface MonitoringBatch {
+  id: string;
+  site_id: string;
+  container_id: string;
+  window_start: string;
+  window_seconds: number;
+  total_events: number;
+  event_counts: Record<string, number>;
+  tag_metrics: Record<string, Record<string, number>>;
+  user_data_quality: Record<string, number>;
+  ecommerce_quality: Record<string, number>;
+  received_at: string;
 }

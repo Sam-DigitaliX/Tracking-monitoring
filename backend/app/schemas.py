@@ -83,6 +83,7 @@ class SiteRead(BaseModel):
     stape_container_id: str | None
     addingwell_container_id: str | None
     cmp_provider: str | None
+    ingest_key: str | None
     is_active: bool
     created_at: datetime
 
@@ -190,3 +191,128 @@ class DashboardOverview(BaseModel):
     total_critical: int
     clients: list[ClientOverview]
     recent_alerts: list[AlertRead]
+
+
+# ---------- Ingest (from GTM Probr Listener tag) ----------
+
+class IngestTagResult(BaseModel):
+    id: str
+    name: str = ""
+    status: str  # success, failure, timeout, exception
+    execution_time: int = 0
+
+
+class IngestUserData(BaseModel):
+    has_email: bool = False
+    has_phone: bool = False
+    has_first_name: bool = False
+    has_last_name: bool = False
+    has_city: bool = False
+    has_country: bool = False
+
+
+class IngestEcommerce(BaseModel):
+    has_value: bool = False
+    has_currency: bool = False
+    has_transaction_id: bool = False
+    has_items: bool = False
+
+
+class IngestEventPayload(BaseModel):
+    """Single event sent by the Probr GTM tag (per_event mode)."""
+    container_id: str
+    event_name: str
+    timestamp_ms: int
+    tags: list[IngestTagResult] = []
+    user_data: IngestUserData = IngestUserData()
+    ecommerce: IngestEcommerce = IngestEcommerce()
+    batch: bool = False
+
+
+class IngestBatchTagMetrics(BaseModel):
+    success: int = 0
+    failure: int = 0
+    timeout: int = 0
+    exception: int = 0
+    total_exec_ms: int = 0
+    count: int = 0
+
+
+class IngestBatchUserData(BaseModel):
+    email: int = 0
+    phone: int = 0
+    address: int = 0
+    total: int = 0
+
+
+class IngestBatchEcommerce(BaseModel):
+    value: int = 0
+    currency: int = 0
+    transaction_id: int = 0
+    items: int = 0
+    total: int = 0
+
+
+class IngestBatchPayload(BaseModel):
+    """Aggregated batch sent by the Probr GTM tag (batched mode)."""
+    container_id: str
+    batch: bool = True
+    window_start_ms: int
+    window_end_ms: int
+    total_events: int
+    event_counts: dict[str, int] = {}
+    tag_metrics: dict[str, IngestBatchTagMetrics] = {}
+    user_data_quality: IngestBatchUserData = IngestBatchUserData()
+    ecommerce_quality: IngestBatchEcommerce = IngestBatchEcommerce()
+
+
+# ---------- Monitoring Dashboard ----------
+
+class MonitoringBatchRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    site_id: uuid.UUID
+    container_id: str
+    window_start: datetime
+    window_seconds: int
+    total_events: int
+    event_counts: dict
+    tag_metrics: dict
+    user_data_quality: dict
+    ecommerce_quality: dict
+    received_at: datetime
+
+
+class TagHealthSummary(BaseModel):
+    tag_name: str
+    total_executions: int
+    success_count: int
+    failure_count: int
+    success_rate: float
+    avg_execution_time_ms: float
+
+
+class EventVolumeSummary(BaseModel):
+    event_name: str
+    total_count: int
+    trend_pct: float | None = None  # vs previous period
+
+
+class UserDataQualitySummary(BaseModel):
+    email_rate: float
+    phone_rate: float
+    address_rate: float
+    total_events: int
+
+
+class MonitoringOverview(BaseModel):
+    site_id: uuid.UUID
+    site_name: str
+    container_id: str | None
+    period_hours: int
+    total_events: int
+    events: list[EventVolumeSummary]
+    tags: list[TagHealthSummary]
+    user_data: UserDataQualitySummary | None
+    last_seen: datetime | None

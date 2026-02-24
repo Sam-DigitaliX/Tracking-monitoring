@@ -3,6 +3,7 @@ import type {
   Site, SiteCreate, SiteUpdate,
   ProbeConfig, ProbeCreate, ProbeUpdate,
   ProbeResult, Alert, DashboardOverview,
+  MonitoringOverview, MonitoringBatch, TagHealthSummary,
 } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
@@ -71,4 +72,14 @@ export const alerts = {
     request<Alert[]>(`/alerts${siteId ? `?site_id=${siteId}` : ""}`),
   resolve: (id: number) =>
     request<Alert>(`/alerts/${id}/resolve`, { method: "PATCH" }),
+};
+
+/* ── Monitoring (Probr Listener) ───────────────── */
+export const monitoring = {
+  overview: (siteId: string, hours = 24) =>
+    request<MonitoringOverview>(`/monitoring/sites/${siteId}/overview?hours=${hours}`),
+  batches: (siteId: string, hours = 24) =>
+    request<MonitoringBatch[]>(`/monitoring/sites/${siteId}/batches?hours=${hours}`),
+  tagHealth: (siteId: string, tagName: string, hours = 24) =>
+    request<TagHealthSummary>(`/monitoring/sites/${siteId}/tags/${encodeURIComponent(tagName)}?hours=${hours}`),
 };

@@ -1,10 +1,15 @@
 import enum
+import secrets
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+
+def _generate_ingest_key() -> str:
+    return secrets.token_urlsafe(32)
 
 
 class Base(DeclarativeBase):
@@ -71,6 +76,9 @@ class Site(Base):
     addingwell_container_id: Mapped[str | None] = mapped_column(String(100))
     cmp_provider: Mapped[str | None] = mapped_column(String(50))  # axeptio, didomi, cookiebot, etc.
 
+    # Probr listener ingest key (auto-generated)
+    ingest_key: Mapped[str | None] = mapped_column(String(64), unique=True, default=_generate_ingest_key)
+
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -78,6 +86,7 @@ class Site(Base):
     client: Mapped["Client"] = relationship(back_populates="sites")
     probe_configs: Mapped[list["ProbeConfig"]] = relationship(back_populates="site", cascade="all, delete-orphan")
     alerts: Mapped[list["Alert"]] = relationship(back_populates="site", cascade="all, delete-orphan")
+    monitoring_batches: Mapped[list["MonitoringBatch"]] = relationship(back_populates="site", cascade="all, delete-orphan")
 
 
 class ProbeConfig(Base):
@@ -129,3 +138,39 @@ class Alert(Base):
 
     site: Mapped["Site"] = relationship(back_populates="alerts")
     probe_config: Mapped["ProbeConfig"] = relationship()
+
+
+class MonitoringBatch(Base):
+    """Aggregated monitoring data from the Probr GTM listener tag.
+
+    Each row represents a time window (typically 1 minute) of aggregated
+    event and tag execution data for a given site/container.
+    """
+    __tablename__ = "monitoring_batches"
+    __table_args__ = (
+        UniqueConstraint("site_id", "container_id", "window_start", name="uq_monitoring_batch_window"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    site_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    container_id: Mapped[str] = mapped_column(String(50), nullable=False)
+    window_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    window_seconds: Mapped[int] = mapped_column(Integer, default=60)
+
+    total_events: Mapped[int] = mapped_column(Integer, default=0)
+
+    # {"page_view": 847, "purchase": 12, "add_to_cart": 43, ...}
+    event_counts: Mapped[dict] = mapped_column(JSON, default=dict)
+
+    # {"GA4": {"success": 891, "failure": 2, "timeout": 0, "total_exec_ms": 40095, "count": 893}, ...}
+    tag_metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+
+    # {"email": 340, "phone": 120, "address": 80, "total": 1000}
+    user_data_quality: Mapped[dict] = mapped_column(JSON, default=dict)
+
+    # {"value": 12, "currency": 12, "transaction_id": 12, "items": 12, "total": 12}
+    ecommerce_quality: Mapped[dict] = mapped_column(JSON, default=dict)
+
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    site: Mapped["Site"] = relationship(back_populates="monitoring_batches")

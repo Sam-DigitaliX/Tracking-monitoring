@@ -16,10 +16,9 @@ ___INFO___
   "displayName": "Probr — Server-Side Listener",
   "brand": {
     "id": "probr",
-    "displayName": "Probr",
-    "thumbnail": ""
+    "displayName": "Probr"
   },
-  "description": "Monitors all server-side events and tag executions, sending aggregated data to your Probr dashboard for real-time tracking quality analysis.",
+  "description": "Monitors all server-side events and tag executions, sending aggregated data to your Probr dashboard for real-time tracking quality analysis. Tracks tag success rates, execution times, user data quality (enhanced conversions), and e-commerce parameter completeness — independently of your hosting provider.",
   "containerContexts": [
     "SERVER"
   ],
@@ -44,10 +43,10 @@ ___TEMPLATE_PARAMETERS___
       },
       {
         "type": "REGEX",
-        "args": ["^https?://.*"]
+        "args": ["^https://.*"]
       }
     ],
-    "help": "The URL of your Probr API ingestion endpoint (e.g. https://probr.example.com/api/ingest)"
+    "help": "The HTTPS URL of your Probr API ingestion endpoint (e.g. https://probr.example.com/api/ingest)."
   },
   {
     "type": "TEXT",
@@ -67,48 +66,64 @@ ___TEMPLATE_PARAMETERS___
     "checkboxText": "Track user data quality (email, phone, address presence)",
     "simpleValueType": true,
     "defaultValue": true,
-    "help": "When enabled, the tag checks for presence of enhanced conversion data (email, phone, address) and reports quality scores."
+    "help": "When enabled, the tag checks for presence of enhanced conversion data (email, phone, address) and reports quality scores to the Probr dashboard."
   },
   {
     "type": "TEXT",
     "name": "excludeTagIds",
-    "displayName": "Tag IDs to exclude (comma-separated)",
+    "displayName": "Tag IDs to Exclude (comma-separated)",
     "simpleValueType": true,
     "defaultValue": "",
-    "help": "Comma-separated list of tag IDs to exclude from monitoring (e.g. the Probr tag itself). Leave empty to monitor all tags."
+    "help": "Comma-separated list of tag IDs to exclude from monitoring. Leave empty to monitor all tags."
   },
   {
     "type": "SELECT",
     "name": "sendMode",
-    "displayName": "Send mode",
+    "displayName": "Send Mode",
     "macrosInSelect": false,
     "selectItems": [
       { "value": "per_event", "displayValue": "Per event (recommended)" },
-      { "value": "batched", "displayValue": "Batched (lower overhead)" }
+      { "value": "batched", "displayValue": "Batched (lower network overhead)" }
     ],
     "simpleValueType": true,
     "defaultValue": "per_event",
-    "help": "Per event: sends one request per event (most reliable). Batched: buffers events and sends periodically (lower overhead, slight data loss risk on instance restart)."
+    "help": "Per event: sends one HTTP request per event (most reliable, real-time). Batched: buffers events in memory and sends periodically (lower overhead, slight data loss risk on container instance restart)."
   },
   {
     "type": "TEXT",
     "name": "batchSize",
-    "displayName": "Batch size (events)",
+    "displayName": "Batch Size (events)",
     "simpleValueType": true,
     "defaultValue": "50",
     "enablingConditions": [
       { "paramName": "sendMode", "paramValue": "batched", "type": "EQUALS" }
     ],
-    "help": "Number of events to buffer before sending a batch."
+    "help": "Number of events to buffer before sending a batch to the Probr API."
   }
 ]
 
 
 ___SANDBOXED_JS_FOR_SERVER___
 
-// Probr — Server-Side Listener Tag
-// Captures all events and tag execution results flowing through the sGTM container
-// and sends monitoring data to the Probr API for real-time quality analysis.
+/**
+ * Probr — Server-Side Listener Tag
+ *
+ * Captures all events and tag execution results flowing through the sGTM
+ * container and sends monitoring data to the Probr API for real-time
+ * tracking quality analysis.
+ *
+ * What it monitors:
+ * - Tag execution results: success, failure, timeout, exception
+ * - Tag execution time (ms)
+ * - Event volumes by name
+ * - User data quality: presence of email, phone, address fields
+ * - E-commerce data quality: presence of value, currency, transaction_id, items
+ *
+ * Works with any sGTM hosting provider (Stape, Addingwell, self-hosted, etc.)
+ *
+ * @version 1.0.0
+ * @license Apache-2.0
+ */
 
 const addEventCallback = require('addEventCallback');
 const sendHttpRequest = require('sendHttpRequest');
@@ -130,7 +145,7 @@ const TRACK_USER_DATA = data.trackUserData !== false;
 const SEND_MODE = data.sendMode || 'per_event';
 const BATCH_SIZE = makeInteger(data.batchSize || '50');
 
-// Parse excluded tag IDs
+// Parse excluded tag IDs into an array
 const excludeTagIds = [];
 if (data.excludeTagIds) {
   const parts = makeString(data.excludeTagIds).split(',');
@@ -147,7 +162,7 @@ const containerVersion = getContainerVersion();
 const containerId = containerVersion.containerId || 'unknown';
 const timestamp = getTimestampMillis();
 
-// Check user data presence for quality scoring
+// Check user data presence for quality scoring (enhanced conversions)
 var userDataPresence = {};
 if (TRACK_USER_DATA) {
   const userData = getEventData('user_data');
@@ -163,7 +178,7 @@ if (TRACK_USER_DATA) {
   };
 }
 
-// Collect additional e-commerce data quality signals
+// Collect e-commerce data quality signals on relevant events
 var ecommercePresence = {};
 if (eventName === 'purchase' || eventName === 'begin_checkout' ||
     eventName === 'add_to_cart' || eventName === 'add_payment_info') {
@@ -175,17 +190,17 @@ if (eventName === 'purchase' || eventName === 'begin_checkout' ||
   };
 }
 
-// ── Tag Result Capture ────────────────────────────────────────
+// ── Tag Result Capture via addEventCallback ───────────────────
 
 addEventCallback(function(ctId, eventData) {
-  // Build tag results array
+  // Build tag results array from the event metadata
   var tags = [];
   if (eventData && eventData.tags) {
     for (var t = 0; t < eventData.tags.length; t++) {
       var tag = eventData.tags[t];
       var tagId = makeString(tag.id);
 
-      // Skip excluded tags (like the Probr tag itself)
+      // Skip excluded tags (e.g. the Probr tag itself)
       var skip = false;
       for (var e = 0; e < excludeTagIds.length; e++) {
         if (excludeTagIds[e] === tagId) {
@@ -285,9 +300,8 @@ addEventCallback(function(ctId, eventData) {
     if (ecommercePresence.has_items) buffer.ecommerce.items = (buffer.ecommerce.items || 0) + 1;
   }
 
-  // Check flush condition
+  // Check flush condition: send when batch is full
   if (buffer.count >= BATCH_SIZE) {
-    // Build aggregated payload
     var batchPayload = {
       container_id: containerId,
       batch: true,
@@ -315,7 +329,7 @@ addEventCallback(function(ctId, eventData) {
       timeout: 10000
     }, JSON.stringify(batchPayload));
 
-    // Reset buffer
+    // Reset buffer after flush
     buffer = {
       events: {},
       tags: {},
@@ -329,7 +343,7 @@ addEventCallback(function(ctId, eventData) {
   templateDataStorage.setItemCopy('probr_buffer', buffer);
 });
 
-// Signal tag success immediately (non-blocking)
+// Signal tag success immediately — monitoring is non-blocking
 data.gtmOnSuccess();
 
 

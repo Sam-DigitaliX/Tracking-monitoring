@@ -1,0 +1,8 @@
+homepage: https://probr.io
+documentation: https://docs.probr.io/gtm-listener
+versions:
+  - sha: 921ce433c7ba7799d94370cea61c1f3e65f89842
+    changeNotes: >-
+      Initial release — Server-side event monitoring with tag health tracking,
+      user data quality scoring, e-commerce parameter completeness,
+      per-event and batched send modes.

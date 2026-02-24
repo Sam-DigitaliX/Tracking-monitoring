@@ -217,9 +217,7 @@ function AsciiReveal({ gridIndex }: { gridIndex: number }) {
     <div
       style={{
         position: "absolute",
-        inset: 0,
-        borderRadius: 14,
-        overflow: "hidden",
+        inset: -4,
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -806,8 +804,6 @@ export default function CardBeamSection() {
                     zIndex: 1,
                     clipPath: "inset(0 100% 0 0)",
                     opacity: 0,
-                    borderRadius: 14,
-                    overflow: "hidden",
                   }}
                 >
                   <AsciiReveal gridIndex={i % CARDS.length} />

@@ -30,16 +30,34 @@ TOKEN_ID="${2:?Usage: $0 <BOOKSTACK_URL> <TOKEN_ID> <TOKEN_SECRET> [--lang fr|en
 TOKEN_SECRET="${3:?Usage: $0 <BOOKSTACK_URL> <TOKEN_ID> <TOKEN_SECRET> [--lang fr|en]}"
 
 # --- Language ---
-# Supports: --lang en, --lang=en, en (as 4th arg)
+# Supports: --lang en, --lang=en, en/fr (positional)
 LANG_OPT="fr"
-ARG4="${4:-}"
-if [[ "$ARG4" == "--lang" ]]; then
-  LANG_OPT="${5:-fr}"
-elif [[ "$ARG4" == --lang=* ]]; then
-  LANG_OPT="${ARG4#--lang=}"
-elif [[ "$ARG4" == "en" || "$ARG4" == "fr" ]]; then
-  LANG_OPT="$ARG4"
-fi
+shift 3
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --lang)
+      if [[ $# -ge 2 ]]; then
+        LANG_OPT="$2"
+        shift 2
+      else
+        echo "ERROR: --lang requires a value (fr or en)." >&2
+        exit 1
+      fi
+      ;;
+    --lang=*)
+      LANG_OPT="${1#--lang=}"
+      shift
+      ;;
+    en|fr)
+      LANG_OPT="$1"
+      shift
+      ;;
+    *)
+      echo "WARNING: Unknown argument '$1', ignoring." >&2
+      shift
+      ;;
+  esac
+done
 
 if [[ "$LANG_OPT" != "fr" && "$LANG_OPT" != "en" ]]; then
   echo "ERROR: Unsupported language '${LANG_OPT}'. Use 'fr' or 'en'." >&2

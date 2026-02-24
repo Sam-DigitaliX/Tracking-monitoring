@@ -1,0 +1,809 @@
+<!-- ============================================================
+     Probr.io — BookStack Custom Theme
+     Paste this into: Settings > Customization > Custom HTML Head Content
+     ============================================================ -->
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Favicon override (optional — uncomment and set your URL)
+<link rel="icon" href="https://your-cdn.com/probr-favicon.ico" type="image/x-icon">
+-->
+
+<style>
+/* ================================================================
+   0. CSS CUSTOM PROPERTIES — Probr Design Tokens
+   ================================================================ */
+:root {
+  /* Brand gradient stops */
+  --probr-purple:  #833AB4;
+  --probr-red:     #FD1D1D;
+  --probr-orange:  #FCB045;
+
+  /* Surfaces */
+  --bg-base:       hsl(240 15% 6%);
+  --bg-raised:     hsl(240 15% 8%);
+  --bg-surface:    hsl(240 15% 10%);
+  --bg-overlay:    hsl(240 15% 12%);
+
+  /* Glass */
+  --glass-fill:    rgba(255, 255, 255, 0.04);
+  --glass-border:  rgba(255, 255, 255, 0.08);
+  --glass-hover:   rgba(255, 255, 255, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.10);
+
+  /* Text */
+  --text-primary:   hsl(0 0% 95%);
+  --text-secondary: hsl(0 0% 70%);
+  --text-muted:     hsl(0 0% 50%);
+  --text-link:      #a855f7;
+  --text-link-hover:#c084fc;
+
+  /* Semantic */
+  --color-success: hsl(142 71% 45%);
+  --color-warning: hsl(38 92% 50%);
+  --color-danger:  hsl(0 84% 60%);
+  --color-info:    hsl(217 91% 60%);
+
+  /* Shadows & Glows */
+  --shadow-card:   0 4px 24px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.20);
+  --glow-purple:   0 0 40px rgba(131,58,180,0.15);
+  --glow-orange:   0 0 30px rgba(252,176,69,0.10);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* ================================================================
+   1. BASE & TYPOGRAPHY
+   ================================================================ */
+body {
+  background: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle background orbs (atmospheric lighting) */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 0;
+  pointer-events: none;
+}
+body::before {
+  top: -10%;
+  left: -5%;
+  width: 500px;
+  height: 500px;
+  background: rgba(131, 58, 180, 0.12);
+}
+body::after {
+  bottom: -10%;
+  right: -5%;
+  width: 450px;
+  height: 450px;
+  background: rgba(252, 176, 69, 0.08);
+}
+
+h1, h2, h3, h4, h5, h6,
+.shelf-name, .book-name {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-weight: 700 !important; }
+h2 { font-weight: 600 !important; }
+
+p, li, td, th, span, label, .text-muted, small {
+  color: var(--text-secondary) !important;
+}
+
+a {
+  color: var(--text-link) !important;
+  text-decoration: none !important;
+  transition: color var(--transition-fast) !important;
+}
+a:hover {
+  color: var(--text-link-hover) !important;
+}
+
+hr {
+  border-color: var(--glass-border) !important;
+}
+
+::selection {
+  background: rgba(131, 58, 180, 0.35);
+  color: white;
+}
+
+/* ================================================================
+   2. HEADER / NAVIGATION
+   ================================================================ */
+header, .header {
+  background: rgba(15, 15, 25, 0.75) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: 0 1px 30px rgba(0, 0, 0, 0.3) !important;
+  position: relative;
+  z-index: 50;
+}
+
+/* Brand gradient accent line at top of header */
+header::before, .header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    var(--probr-purple),
+    var(--probr-red),
+    var(--probr-orange)
+  );
+  z-index: 51;
+}
+
+header a, .header a,
+header .header-links a {
+  color: var(--text-secondary) !important;
+  transition: color var(--transition-fast) !important;
+}
+header a:hover, .header a:hover,
+header .header-links a:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Search bar in header */
+header input[type="text"],
+header .search-box input,
+.header input[type="text"] {
+  background: var(--glass-fill) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: blur(12px) !important;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+header input[type="text"]:focus,
+.header input[type="text"]:focus {
+  border-color: rgba(131, 58, 180, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(131, 58, 180, 0.15) !important;
+  outline: none !important;
+}
+
+/* Header dropdown menus */
+header .dropdown-menu, .header .dropdown-menu {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-card) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* ================================================================
+   3. SIDEBAR
+   ================================================================ */
+.tri-layout-left,
+.tri-layout-right,
+.sidebar,
+[class*="sidebar"] {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: var(--glass-border) !important;
+}
+
+.tri-layout-left-contents,
+.tri-layout-right-contents {
+  background: transparent !important;
+}
+
+/* ================================================================
+   4. MAIN CONTENT AREA
+   ================================================================ */
+.content-wrap,
+.tri-layout-middle,
+.tri-layout-middle-contents,
+.page-content {
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Page content specifics */
+.page-content {
+  color: var(--text-secondary) !important;
+  line-height: 1.75 !important;
+}
+
+.page-content h1,
+.page-content h2,
+.page-content h3,
+.page-content h4 {
+  color: var(--text-primary) !important;
+  margin-top: 1.8em !important;
+  padding-bottom: 0.3em !important;
+}
+
+.page-content h2 {
+  border-bottom: 1px solid var(--glass-border) !important;
+}
+
+/* ================================================================
+   5. CARDS — Glassmorphism
+   ================================================================ */
+.card,
+.bookshelf-grid .grid-card,
+.book-grid .grid-card,
+.content-panel {
+  background: var(--glass-fill) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  transition: transform var(--transition-base),
+              box-shadow var(--transition-base),
+              border-color var(--transition-base) !important;
+  overflow: hidden;
+}
+
+.card:hover,
+.bookshelf-grid .grid-card:hover,
+.book-grid .grid-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(131, 58, 180, 0.20) !important;
+  box-shadow: var(--shadow-card), var(--glow-purple) !important;
+}
+
+.card h2 a, .card h3 a,
+.grid-card .grid-card-content a {
+  color: var(--text-primary) !important;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+}
+
+/* Card footer / meta */
+.card .card-footer,
+.card .meta-info {
+  border-top: 1px solid var(--glass-border) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* ================================================================
+   6. ENTITY LISTS
+   ================================================================ */
+.entity-list-item,
+.entity-list-item-basic {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  padding: 12px 16px !important;
+  border-radius: var(--radius-sm) !important;
+  transition: background var(--transition-fast) !important;
+}
+
+.entity-list-item:hover,
+.entity-list-item-basic:hover {
+  background: var(--glass-hover) !important;
+}
+
+.entity-list-item .entity-list-item--name {
+  color: var(--text-primary) !important;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+}
+
+.entity-list-item .entity-list-item--description,
+.entity-list-item p {
+  color: var(--text-muted) !important;
+}
+
+/* Entity type icons / color accents */
+.entity-list-item .icon-book,
+.entity-list-item .icon-page,
+.entity-list-item .icon-chapter {
+  opacity: 0.7;
+}
+
+/* ================================================================
+   7. BUTTONS
+   ================================================================ */
+
+/* Primary buttons — brand gradient */
+.button.primary,
+button.primary,
+.btn-primary,
+input[type="submit"].primary,
+a.button.primary {
+  background: linear-gradient(135deg, var(--probr-purple), var(--probr-red), var(--probr-orange)) !important;
+  border: none !important;
+  color: white !important;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 2px 12px rgba(131, 58, 180, 0.25) !important;
+  transition: transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              filter var(--transition-fast) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.button.primary:hover,
+button.primary:hover,
+.btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 20px rgba(131, 58, 180, 0.35) !important;
+  filter: brightness(1.1) !important;
+}
+
+.button.primary:active,
+button.primary:active {
+  transform: translateY(0) !important;
+  filter: brightness(0.95) !important;
+}
+
+/* Secondary / outline buttons — glass style */
+.button,
+button:not(.primary):not(.danger),
+.btn,
+a.button:not(.primary):not(.danger) {
+  background: var(--glass-fill) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--text-secondary) !important;
+  border-radius: var(--radius-md) !important;
+  backdrop-filter: blur(12px) !important;
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast) !important;
+}
+
+.button:hover,
+button:not(.primary):not(.danger):hover,
+.btn:hover {
+  background: var(--glass-hover) !important;
+  border-color: rgba(131, 58, 180, 0.3) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Danger buttons */
+.button.danger,
+button.danger,
+.btn-danger {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: var(--color-danger) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.button.danger:hover,
+button.danger:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+/* ================================================================
+   8. FORMS & INPUTS
+   ================================================================ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="url"],
+input[type="number"],
+select,
+textarea {
+  background: var(--glass-fill) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(131, 58, 180, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(131, 58, 180, 0.12) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Checkboxes & toggles */
+input[type="checkbox"]:checked {
+  accent-color: var(--probr-purple) !important;
+}
+
+/* ================================================================
+   9. BREADCRUMBS
+   ================================================================ */
+.breadcrumbs,
+.breadcrumb-listing {
+  background: transparent !important;
+}
+
+.breadcrumbs a,
+.breadcrumb-listing a {
+  color: var(--text-muted) !important;
+}
+
+.breadcrumbs a:hover,
+.breadcrumb-listing a:hover {
+  color: var(--text-link) !important;
+}
+
+.breadcrumbs .separator {
+  color: var(--text-muted) !important;
+  opacity: 0.5;
+}
+
+/* ================================================================
+   10. TABLES
+   ================================================================ */
+table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+table thead th {
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  text-transform: uppercase !important;
+  font-size: 0.75em !important;
+  letter-spacing: 0.05em !important;
+}
+
+table tbody tr {
+  transition: background var(--transition-fast) !important;
+}
+
+table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+table td, table th {
+  border-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ================================================================
+   11. CODE BLOCKS
+   ================================================================ */
+code {
+  background: rgba(131, 58, 180, 0.10) !important;
+  color: #c084fc !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace !important;
+  font-size: 0.9em !important;
+}
+
+pre {
+  background: var(--bg-raised) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 16px 20px !important;
+  overflow-x: auto;
+}
+
+pre code {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  padding: 0 !important;
+}
+
+/* ================================================================
+   12. TAGS
+   ================================================================ */
+.tag-item,
+.tag-name,
+span.tag {
+  background: rgba(131, 58, 180, 0.12) !important;
+  border: 1px solid rgba(131, 58, 180, 0.25) !important;
+  color: #c084fc !important;
+  border-radius: 9999px !important;
+  font-size: 0.75em !important;
+  padding: 2px 10px !important;
+  font-weight: 500 !important;
+}
+
+/* ================================================================
+   13. DROPDOWNS & POPUPS
+   ================================================================ */
+.dropdown-menu,
+.popup-body,
+[class*="dropdown"] ul {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.dropdown-menu a,
+.dropdown-menu button {
+  color: var(--text-secondary) !important;
+  transition: background var(--transition-fast) !important;
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu button:hover {
+  background: var(--glass-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ================================================================
+   14. NOTIFICATIONS & ALERTS
+   ================================================================ */
+.notification,
+.alert {
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.notification.pos,
+.alert-success {
+  background: rgba(34, 197, 94, 0.10) !important;
+  border-color: rgba(34, 197, 94, 0.25) !important;
+  color: var(--color-success) !important;
+}
+
+.notification.warning,
+.alert-warning {
+  background: rgba(245, 158, 11, 0.10) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+  color: var(--color-warning) !important;
+}
+
+.notification.neg,
+.alert-danger {
+  background: rgba(239, 68, 68, 0.10) !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+  color: var(--color-danger) !important;
+}
+
+.notification.info,
+.alert-info {
+  background: rgba(59, 130, 246, 0.10) !important;
+  border-color: rgba(59, 130, 246, 0.25) !important;
+  color: var(--color-info) !important;
+}
+
+/* ================================================================
+   15. SCROLL BAR
+   ================================================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.20);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.12) var(--bg-base);
+}
+
+/* ================================================================
+   16. SHELF / BOOK COVERS & GRID
+   ================================================================ */
+.bookshelf-grid .grid-card .grid-card-content,
+.book-grid .grid-card .grid-card-content {
+  background: transparent !important;
+}
+
+.bookshelf-grid .grid-card .grid-card-header,
+.book-grid .grid-card .grid-card-header {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gradient overlay on cover images */
+.grid-card .grid-card-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to top, var(--bg-base), transparent);
+  pointer-events: none;
+}
+
+/* ================================================================
+   17. PAGE EDITOR (for editing pages)
+   ================================================================ */
+.page-editor,
+.editor-toolbar,
+.CodeMirror {
+  background: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+}
+
+.CodeMirror-gutters {
+  background: var(--bg-raised) !important;
+  border-right: 1px solid var(--glass-border) !important;
+}
+
+.editor-toolbar {
+  border-bottom: 1px solid var(--glass-border) !important;
+  background: var(--bg-raised) !important;
+}
+
+/* WYSIWYG editor */
+.mce-content-body {
+  background: var(--bg-base) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* ================================================================
+   18. MODAL / DIALOG
+   ================================================================ */
+.popup-body,
+.modal-content,
+[overlay] .popup-body {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(24px) !important;
+}
+
+/* Modal overlay */
+.overlay,
+[overlay] {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* ================================================================
+   19. SHELF COLOR STRIPS — use brand gradient
+   ================================================================ */
+.tri-layout-left .entity-list-item .icon,
+.entity-color-strip {
+  /* Override BookStack shelf color strips with Probr gradient */
+}
+
+/* ================================================================
+   20. HOME PAGE HERO — gradient banner
+   ================================================================ */
+.home-default .banner {
+  background: linear-gradient(135deg,
+    rgba(131, 58, 180, 0.15),
+    rgba(253, 29, 29, 0.08),
+    rgba(252, 176, 69, 0.10)
+  ) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-xl) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* ================================================================
+   21. FOOTER
+   ================================================================ */
+footer, .footer {
+  background: transparent !important;
+  border-top: 1px solid var(--glass-border) !important;
+  color: var(--text-muted) !important;
+}
+
+/* ================================================================
+   22. IMAGES in page content
+   ================================================================ */
+.page-content img {
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+
+.page-content img:hover {
+  border-color: rgba(131, 58, 180, 0.3) !important;
+  box-shadow: var(--glow-purple) !important;
+}
+
+/* ================================================================
+   23. BLOCK QUOTES
+   ================================================================ */
+blockquote, .page-content blockquote {
+  border-left: 3px solid var(--probr-purple) !important;
+  background: rgba(131, 58, 180, 0.06) !important;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+  padding: 12px 16px !important;
+  color: var(--text-secondary) !important;
+}
+
+/* ================================================================
+   24. CALLOUTS (info, warning, danger, success)
+   ================================================================ */
+.callout {
+  border-radius: var(--radius-md) !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+}
+
+.callout.info {
+  background: rgba(59, 130, 246, 0.08) !important;
+  border-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.callout.success {
+  background: rgba(34, 197, 94, 0.08) !important;
+  border-color: rgba(34, 197, 94, 0.25) !important;
+}
+
+.callout.warning {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.callout.danger {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+/* ================================================================
+   25. LOADING / PROGRESS
+   ================================================================ */
+.loading-container .spinner {
+  border-color: rgba(131, 58, 180, 0.2) !important;
+  border-top-color: var(--probr-purple) !important;
+}
+
+/* Page loading bar */
+#nprogress .bar {
+  background: linear-gradient(90deg, var(--probr-purple), var(--probr-red), var(--probr-orange)) !important;
+}
+
+/* ================================================================
+   26. PRINT — reset to clean output
+   ================================================================ */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  body::before, body::after {
+    display: none !important;
+  }
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    background: white !important;
+  }
+  a { color: #333 !important; }
+  h1,h2,h3,h4,h5,h6 { color: black !important; }
+  p,li,td,th,span { color: #333 !important; }
+}
+</style>

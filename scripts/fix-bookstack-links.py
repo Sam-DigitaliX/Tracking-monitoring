@@ -41,23 +41,23 @@ from urllib.error import HTTPError
 FILENAME_TO_TITLE = {
     "en": {
         "getting-started/introduction.md": "Introduction to Probr",
-        "getting-started/prerequisites.md": "Prerequisites and installation",
-        "gtm-listener/configuration.md": "Tag configuration",
+        "getting-started/prerequisites.md": "Prerequisites and Installation",
+        "gtm-listener/configuration.md": "Tag Configuration",
         "gtm-listener/send-modes.md": "Per event vs Batched",
-        "gtm-listener/data-quality.md": "User data and E-commerce",
-        "administration/clients-and-sites.md": "Client and site management",
-        "administration/probes.md": "Probe configuration and management",
-        "monitoring/dashboard.md": "Dashboard and control room",
-        "monitoring/analytics.md": "Monitoring analytics",
-        "monitoring/alerts.md": "Alert management and notifications",
-        "troubleshooting/common-issues.md": "Debug and solutions",
-        "troubleshooting/faq.md": "Frequently asked questions",
-        "api-reference/endpoints-overview.md": "Complete API reference",
-        "api-reference/authentication.md": "API keys and security",
+        "gtm-listener/data-quality.md": "User Data and E-commerce",
+        "administration/clients-and-sites.md": "Clients and Sites",
+        "administration/probes.md": "Probe Management",
+        "monitoring/dashboard.md": "Dashboard and Control Room",
+        "monitoring/analytics.md": "Monitoring Analytics",
+        "monitoring/alerts.md": "Alert Management",
+        "troubleshooting/common-issues.md": "Debug and Solutions",
+        "troubleshooting/faq.md": "Frequently Asked Questions",
+        "api-reference/endpoints-overview.md": "API Endpoints Overview",
+        "api-reference/authentication.md": "API Authentication",
         "api-reference/ingest-endpoint.md": "POST /ingest",
-        "api-reference/management-api.md": "Clients, Sites, Probes, Alerts CRUD",
-        "api-reference/monitoring-api.md": "Dashboard, Analytics, Flush",
-        "api-reference/rate-limits.md": "Limits and quotas",
+        "api-reference/management-api.md": "Management API",
+        "api-reference/monitoring-api.md": "Monitoring API",
+        "api-reference/rate-limits.md": "Limits and Quotas",
     },
     "fr": {
         "getting-started/introduction.md": "Introduction a Probr",
@@ -65,19 +65,20 @@ FILENAME_TO_TITLE = {
         "gtm-listener/configuration.md": "Configuration du tag",
         "gtm-listener/send-modes.md": "Per event vs Batched",
         "gtm-listener/data-quality.md": "User data et E-commerce",
-        "administration/clients-and-sites.md": "Gestion des clients et sites",
-        "administration/probes.md": "Configuration et gestion des probes",
+        "administration/clients-and-sites.md": "Clients et Sites",
+        "administration/probes.md": "Gestion des probes",
         "monitoring/dashboard.md": "Dashboard et centre de controle",
         "monitoring/analytics.md": "Analytics de monitoring",
-        "monitoring/alerts.md": "Gestion des alertes et notifications",
+        "monitoring/alerts.md": "Gestion des alertes",
         "troubleshooting/common-issues.md": "Debug et solutions",
         "troubleshooting/faq.md": "Questions frequentes",
-        "api-reference/endpoints-overview.md": "Reference API complete",
-        "api-reference/authentication.md": "Cles API et securite",
+        # API pages are shared (English titles in BookStack)
+        "api-reference/endpoints-overview.md": "API Endpoints Overview",
+        "api-reference/authentication.md": "API Authentication",
         "api-reference/ingest-endpoint.md": "POST /ingest",
-        "api-reference/management-api.md": "Clients, Sites, Probes, Alertes CRUD",
-        "api-reference/monitoring-api.md": "Dashboard, Analytics, Flush",
-        "api-reference/rate-limits.md": "Limites et quotas",
+        "api-reference/management-api.md": "Management API",
+        "api-reference/monitoring-api.md": "Monitoring API",
+        "api-reference/rate-limits.md": "Limits and Quotas",
     },
 }
 
@@ -254,11 +255,23 @@ def main():
     all_pages = fetch_all_pages(api)
     print(f"      {len(all_pages)} pages found")
 
-    # Global map: title → page_id (no language split)
-    # This handles shared shelves (e.g., API docs used by both EN and FR)
-    page_id_by_title = {}
+    # Per-language page maps: language-specific pages first, then shared
+    # This ensures FR links go to FR pages (not EN) when both exist
+    page_id_by_lang = {"en": {}, "fr": {}}
+
+    # First pass: language-specific shelf pages
     for page in all_pages:
-        page_id_by_title[page["name"]] = page["id"]
+        lang = book_lang.get(page.get("book_id"))
+        if lang:
+            page_id_by_lang[lang][page["name"]] = page["id"]
+
+    # Second pass: shared shelf pages (only if title not already present)
+    for page in all_pages:
+        lang = book_lang.get(page.get("book_id"))
+        if lang is None:
+            for l in ["en", "fr"]:
+                if page["name"] not in page_id_by_lang[l]:
+                    page_id_by_lang[l][page["name"]] = page["id"]
 
     # Determine which pages to scan and their language context
     pages_to_inspect = []
@@ -302,18 +315,19 @@ def main():
         for page in sorted(all_pages, key=lambda p: p["id"]):
             lang_tag = book_lang.get(page.get("book_id"))
             lang_label = (lang_tag or "SHARED").upper()
-            in_map = "mapped" if page["name"] in TITLE_TO_FILENAME.get(lang_tag or "", {}) else ""
-            if not in_map and not lang_tag:
-                for l in ["en", "fr"]:
-                    if page["name"] in TITLE_TO_FILENAME.get(l, {}).values():
-                        in_map = f"mapped({l})"
-                        break
+            in_map = ""
+            if lang_tag and page["name"] in TITLE_TO_FILENAME.get(lang_tag, {}):
+                in_map = "mapped"
+            elif not lang_tag:
+                langs = [l for l in ["en", "fr"] if page["name"] in TITLE_TO_FILENAME.get(l, {}).values()]
+                if langs:
+                    in_map = f"mapped({','.join(langs)})"
             print(f"        #{page['id']:>4}  [{lang_label:>6}]  {page['name']!r}  {in_map}")
         print()
         all_en_titles = set(FILENAME_TO_TITLE["en"].values())
         all_fr_titles = set(FILENAME_TO_TITLE["fr"].values())
-        missing_en = all_en_titles - set(page_id_by_title.keys())
-        missing_fr = all_fr_titles - set(page_id_by_title.keys())
+        missing_en = all_en_titles - set(page_id_by_lang["en"].keys())
+        missing_fr = all_fr_titles - set(page_id_by_lang["fr"].keys())
         if missing_en:
             print(f"      Missing EN titles: {missing_en}")
         if missing_fr:
@@ -334,7 +348,7 @@ def main():
 
         fixed_html, changes = process_page(
             html, page_info["name"], page_info["lang"],
-            page_id_by_title, base_url,
+            page_id_by_lang[page_info["lang"]], base_url,
         )
 
         if changes:

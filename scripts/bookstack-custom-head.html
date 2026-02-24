@@ -132,7 +132,41 @@ input[type="checkbox"]:checked {
 .bookshelf-grid .grid-card,
 .book-grid .grid-card,
 .content-panel {
+  border: 1px solid transparent !important;
+  border-image: var(--probr-gradient) 1 !important;
   border-radius: var(--radius-lg) !important;
+}
+
+/* Gradient border + border-radius workaround (border-image breaks radius).
+   We use a pseudo-element behind the card instead. */
+.card,
+.bookshelf-grid .grid-card,
+.book-grid .grid-card,
+.content-panel {
+  border-image: none !important;
+  border: none !important;
+  position: relative;
+}
+
+.card::before,
+.bookshelf-grid .grid-card::before,
+.book-grid .grid-card::before,
+.content-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  padding: 1px;
+  background: var(--probr-gradient);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .button, button, .btn, a.button,

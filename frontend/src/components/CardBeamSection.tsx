@@ -74,6 +74,7 @@ function getDims(w: number): Dims {
 const P_R = 190;
 const P_G = 170;
 const P_B = 255;
+const PARTICLE_COLOR = `rgb(${P_R},${P_G},${P_B})`;
 
 const GRID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$!=+.:·<>{}[]|/\\";
 
@@ -432,6 +433,12 @@ export default function CardBeamSection() {
   const metalLayerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const codeLayerRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  /* ── Performance caches ──────────────────────────────── */
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const frameCountRef = useRef(0);
+  /* Cache last clipPath per card to avoid redundant DOM writes */
+  const lastClipRef = useRef<string[]>([]);
+
   /* ── Responsive dimensions ──────────────────────────── */
 
   useEffect(() => {
@@ -457,13 +464,11 @@ export default function CardBeamSection() {
       cardTop: number,
       cardBottom: number,
     ) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
+      const ctx = ctxRef.current;
       if (!ctx) return;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const now = Date.now();
+      ctx.clearRect(0, 0, sW, sH);
+      const now = performance.now();
 
       /* ── 1. Ambient floating particles ─────────────── */
 
@@ -494,58 +499,50 @@ export default function CardBeamSection() {
         const distFromBeam = Math.abs(dot.x - beamX);
         const beamProximity = Math.max(0, 1 - distFromBeam / 250);
         const pulse = 0.6 + 0.4 * Math.sin(now / 2000 + dot.phase);
-        const alpha = dot.baseOpacity * pulse + beamProximity * 0.12;
+        const a = (dot.baseOpacity * pulse + beamProximity * 0.12) * 255 | 0;
 
-        ctx.fillStyle = `rgba(${P_R},${P_G},${P_B},${alpha})`;
+        ctx.globalAlpha = a / 255;
+        ctx.fillStyle = PARTICLE_COLOR;
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2);
         ctx.fill();
       }
+      ctx.globalAlpha = 1;
 
       /* ── 2. Beam — constrained to card region ──────── */
 
       const beamMidY = (cardTop + cardBottom) / 2;
       const beamH = cardBottom - cardTop;
-      /* Small taper margin above/below the card */
       const taper = beamH * 0.15;
       const beamYMin = cardTop - taper;
       const beamYMax = cardBottom + taper;
 
       const idlePulse = 0.5 + 0.5 * Math.sin(now / 2200);
 
-      /* Elliptical glow — sized to card height */
+      /* Elliptical glow */
       ctx.save();
       ctx.translate(beamX, beamMidY);
       ctx.scale(1, (beamH * 0.65) / 100);
       const glowR = 60 + intensity * 50;
       const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, glowR);
       const glowBase = 0.04 + idlePulse * 0.02;
-      glowGrad.addColorStop(
-        0,
-        `rgba(100,50,220,${glowBase + intensity * 0.30})`,
-      );
-      glowGrad.addColorStop(
-        0.35,
-        `rgba(80,30,200,${glowBase * 0.6 + intensity * 0.15})`,
-      );
-      glowGrad.addColorStop(
-        0.7,
-        `rgba(60,20,180,${glowBase * 0.2 + intensity * 0.06})`,
-      );
+      glowGrad.addColorStop(0, `rgba(100,50,220,${(glowBase + intensity * 0.30).toFixed(3)})`);
+      glowGrad.addColorStop(0.35, `rgba(80,30,200,${(glowBase * 0.6 + intensity * 0.15).toFixed(3)})`);
+      glowGrad.addColorStop(0.7, `rgba(60,20,180,${(glowBase * 0.2 + intensity * 0.06).toFixed(3)})`);
       glowGrad.addColorStop(1, "transparent");
       ctx.fillStyle = glowGrad;
       ctx.fillRect(-glowR, -glowR, glowR * 2, glowR * 2);
       ctx.restore();
 
-      /* ── 3. Beam — Core line (card-height, tapered) ── */
+      /* ── 3. Beam — Core line ─────────────────────────── */
 
       const coreAlpha = 0.12 + idlePulse * 0.08 + intensity * 0.8;
       const lineGrad = ctx.createLinearGradient(0, beamYMin, 0, beamYMax);
       lineGrad.addColorStop(0, "rgba(255,255,255,0)");
-      lineGrad.addColorStop(0.12, `rgba(255,255,255,${coreAlpha * 0.3})`);
-      lineGrad.addColorStop(0.3, `rgba(255,255,255,${coreAlpha})`);
-      lineGrad.addColorStop(0.7, `rgba(255,255,255,${coreAlpha})`);
-      lineGrad.addColorStop(0.88, `rgba(255,255,255,${coreAlpha * 0.3})`);
+      lineGrad.addColorStop(0.12, `rgba(255,255,255,${(coreAlpha * 0.3).toFixed(3)})`);
+      lineGrad.addColorStop(0.3, `rgba(255,255,255,${coreAlpha.toFixed(3)})`);
+      lineGrad.addColorStop(0.7, `rgba(255,255,255,${coreAlpha.toFixed(3)})`);
+      lineGrad.addColorStop(0.88, `rgba(255,255,255,${(coreAlpha * 0.3).toFixed(3)})`);
       lineGrad.addColorStop(1, "rgba(255,255,255,0)");
 
       ctx.strokeStyle = lineGrad;
@@ -555,18 +552,18 @@ export default function CardBeamSection() {
       ctx.lineTo(beamX, beamYMax);
       ctx.stroke();
 
-      /* Soft extra glow during scanning — NO shadowBlur for perf */
+      /* Extra glow during scanning */
       if (intensity > 0.15) {
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
-        ctx.strokeStyle = `rgba(${P_R},${P_G},${P_B},${intensity * 0.08})`;
+        ctx.globalAlpha = intensity * 0.08;
+        ctx.strokeStyle = PARTICLE_COLOR;
         ctx.lineWidth = 6 + intensity * 6;
         ctx.beginPath();
         ctx.moveTo(beamX, beamYMin);
         ctx.lineTo(beamX, beamYMax);
         ctx.stroke();
-        /* Wider soft pass */
-        ctx.strokeStyle = `rgba(${P_R},${P_G},${P_B},${intensity * 0.03})`;
+        ctx.globalAlpha = intensity * 0.03;
         ctx.lineWidth = 16 + intensity * 10;
         ctx.beginPath();
         ctx.moveTo(beamX, beamYMin);
@@ -575,8 +572,9 @@ export default function CardBeamSection() {
         ctx.restore();
       }
 
-      /* ── 4. Scan particles — luminous dots ─────────── */
+      /* ── 4. Scan particles — batch draw ──────────────── */
 
+      ctx.fillStyle = PARTICLE_COLOR;
       const pool = particlesRef.current;
       for (let i = 0; i < pool.length; i++) {
         const p = pool[i];
@@ -589,14 +587,14 @@ export default function CardBeamSection() {
         p.life -= 1;
 
         const t = p.life / p.maxLife;
-        p.opacity = t > 0.85 ? (1 - t) / 0.15 : t < 0.3 ? t / 0.3 : 1;
-        p.opacity *= 0.7;
+        p.opacity = (t > 0.85 ? (1 - t) / 0.15 : t < 0.3 ? t / 0.3 : 1) * 0.7;
 
-        ctx.fillStyle = `rgba(${P_R},${P_G},${P_B},${p.opacity})`;
+        ctx.globalAlpha = p.opacity;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
       }
+      ctx.globalAlpha = 1;
     },
     [],
   );
@@ -663,17 +661,25 @@ export default function CardBeamSection() {
 
     const beamX = sW / 2;
 
-    /* Canvas resize — only when dimensions change */
+    /* Canvas resize + ctx cache — only when dimensions change */
     const canvas = canvasRef.current;
     if (canvas && (canvas.width !== sW || canvas.height !== sH)) {
       canvas.width = sW;
       canvas.height = sH;
+      ctxRef.current = canvas.getContext("2d");
+    }
+    if (!ctxRef.current && canvas) {
+      ctxRef.current = canvas.getContext("2d");
     }
 
     const trackLeft = -scrollXRef.current;
     const cardTop = (sH - cardH) / 2;
     const cardBottom = cardTop + cardH;
     let isScanning = false;
+
+    frameCountRef.current++;
+    /* Throttle clipPath DOM writes to every 2nd frame (~30fps) */
+    const shouldUpdateClip = frameCountRef.current % 2 === 0;
 
     /* ── Per-card scan ─────────────────────────────────── */
 
@@ -683,11 +689,15 @@ export default function CardBeamSection() {
       if (!metalLayer || !codeLayer) continue;
 
       const cardLeft = trackLeft + i * (cardW + gap);
+
+      /* Skip cards that are fully offscreen */
+      const cardRight = cardLeft + cardW;
+      if (cardRight < -cardW || cardLeft > sW + cardW) continue;
+
       const raw = (beamX - cardLeft) / cardW;
       const scanProgress = Math.max(0, Math.min(1, raw));
 
       /* Fade out decoded cards */
-      const cardRight = cardLeft + cardW;
       const pastBeam = beamX - cardRight;
       const FADE_START = 60;
       const FADE_DIST = 300;
@@ -696,23 +706,42 @@ export default function CardBeamSection() {
         fade = Math.max(0, 1 - (pastBeam - FADE_START) / FADE_DIST);
       }
 
+      /* Build clip key to avoid redundant DOM writes */
+      let clipKey: string;
       if (scanProgress <= 0) {
-        metalLayer.style.clipPath = "none";
-        metalLayer.style.opacity = "1";
-        codeLayer.style.clipPath = "inset(0 100% 0 0)";
-        codeLayer.style.opacity = "0";
+        clipKey = "pre";
       } else if (scanProgress >= 1) {
-        metalLayer.style.clipPath = "inset(0 0 0 100%)";
-        metalLayer.style.opacity = "0";
-        codeLayer.style.clipPath = "none";
-        codeLayer.style.opacity = String(fade);
+        clipKey = `post-${(fade * 100) | 0}`;
       } else {
         isScanning = true;
-        const pct = scanProgress * 100;
-        metalLayer.style.clipPath = `inset(0 0 0 ${pct}%)`;
-        metalLayer.style.opacity = "1";
-        codeLayer.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
-        codeLayer.style.opacity = "1";
+        clipKey = `scan-${(scanProgress * 1000) | 0}`;
+      }
+
+      if (shouldUpdateClip && lastClipRef.current[i] !== clipKey) {
+        lastClipRef.current[i] = clipKey;
+
+        if (scanProgress <= 0) {
+          metalLayer.style.clipPath = "none";
+          metalLayer.style.opacity = "1";
+          codeLayer.style.clipPath = "inset(0 100% 0 0)";
+          codeLayer.style.opacity = "0";
+        } else if (scanProgress >= 1) {
+          metalLayer.style.clipPath = "inset(0 0 0 100%)";
+          metalLayer.style.opacity = "0";
+          codeLayer.style.clipPath = "none";
+          codeLayer.style.opacity = fade.toFixed(2);
+        } else {
+          const pct = scanProgress * 100;
+          metalLayer.style.clipPath = `inset(0 0 0 ${pct.toFixed(1)}%)`;
+          metalLayer.style.opacity = "1";
+          codeLayer.style.clipPath = `inset(0 ${(100 - pct).toFixed(1)}% 0 0)`;
+          codeLayer.style.opacity = "1";
+        }
+      } else if (scanProgress > 0 && scanProgress < 1) {
+        isScanning = true;
+      }
+
+      if (isScanning && scanProgress > 0 && scanProgress < 1) {
         emitParticles(beamX, cardTop, cardBottom);
       }
     }

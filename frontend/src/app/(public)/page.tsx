@@ -279,7 +279,7 @@ export default function LandingPage() {
           onMouseEnter={cancelClose}
           onMouseLeave={scheduleClose}
         >
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-2xl shadow-2xl shadow-black/40 overflow-hidden">
+          <div className="rounded-2xl border border-white/[0.08] bg-background/80 backdrop-blur-2xl shadow-2xl shadow-black/40 overflow-hidden">
             {openDropdown === "ressources" && (
               <div className="p-4">
                 <p className="px-4 pb-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
@@ -301,7 +301,7 @@ export default function LandingPage() {
 
         {/* ── Mobile Menu ── */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden py-4 px-6 border-t border-white/[0.06] bg-white/[0.04] backdrop-blur-2xl">
+          <div className="lg:hidden py-4 px-6 border-t border-white/[0.06] bg-background/80 backdrop-blur-2xl">
             <div className="flex flex-col">
               <Link
                 href="/"

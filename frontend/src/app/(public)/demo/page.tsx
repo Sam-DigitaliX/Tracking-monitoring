@@ -313,7 +313,7 @@ function OverviewTab({
           <div
             key={stat.label}
             className={cn(
-              "glass-card-interactive p-5 animate-fade-in-up",
+              "ev-card p-5 animate-fade-in-up",
               `animate-delay-${(i + 1) * 100}`
             )}
           >
@@ -347,7 +347,7 @@ function OverviewTab({
               <div
                 key={client.client_id}
                 className={cn(
-                  "glass-card-interactive p-5 animate-fade-in-up",
+                  "ev-card p-5 animate-fade-in-up",
                   `animate-delay-${((i % 6) + 1) * 100}`
                 )}
               >
@@ -416,7 +416,7 @@ function OverviewTab({
         </div>
 
         {/* Alerts Feed — 1 col */}
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl shadow-lg">
+        <div className="ev-card">
           <div className="flex flex-col space-y-1.5 p-6 pb-3">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold leading-none tracking-tight">Active Alerts</h3>
@@ -488,7 +488,7 @@ function OverviewTab({
           <h2 className="text-lg font-semibold">Probe Timeline</h2>
           <span className="text-xs text-muted-foreground">Derni&egrave;res ex&eacute;cutions</span>
         </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl overflow-hidden">
+        <div className="ev-card">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -546,7 +546,7 @@ function MonitoringTab() {
     <>
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="glass-card-interactive p-5">
+        <div className="ev-card p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">&Eacute;v&eacute;nements (24h)</p>
@@ -559,7 +559,7 @@ function MonitoringTab() {
             </div>
           </div>
         </div>
-        <div className="glass-card-interactive p-5">
+        <div className="ev-card p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Tags monitor&eacute;s</p>
@@ -570,7 +570,7 @@ function MonitoringTab() {
             </div>
           </div>
         </div>
-        <div className="glass-card-interactive p-5">
+        <div className="ev-card p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Success Rate global</p>
@@ -588,7 +588,7 @@ function MonitoringTab() {
             </div>
           </div>
         </div>
-        <div className="glass-card-interactive p-5">
+        <div className="ev-card p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Email match rate</p>
@@ -604,7 +604,7 @@ function MonitoringTab() {
       {/* Event Volume Chart + Event Breakdown */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Chart — 2 cols */}
-        <div className="lg:col-span-2 rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-6 space-y-4">
+        <div className="lg:col-span-2 ev-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Volume d&apos;&eacute;v&eacute;nements (24h)</h3>
             <span className="text-xs text-muted-foreground">Par heure</span>
@@ -639,7 +639,7 @@ function MonitoringTab() {
         </div>
 
         {/* Event breakdown — 1 col */}
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-6 space-y-4">
+        <div className="ev-card p-6 space-y-4">
           <h3 className="font-semibold">Events par type</h3>
           <div className="space-y-3">
             {demoEventVolumes.map((ev) => {
@@ -686,7 +686,7 @@ function MonitoringTab() {
       {/* Tag Health + User Data Quality */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Tag Health Table — 2 cols */}
-        <div className="lg:col-span-2 rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl overflow-hidden">
+        <div className="lg:col-span-2 ev-card">
           <div className="px-6 pt-6 pb-3">
             <h3 className="font-semibold">Tag Health (server-side)</h3>
             <p className="text-xs text-muted-foreground mt-1">
@@ -748,7 +748,7 @@ function MonitoringTab() {
         </div>
 
         {/* User Data Quality — 1 col */}
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-6 space-y-5">
+        <div className="ev-card p-6 space-y-5">
           <div>
             <h3 className="font-semibold">User Data Quality</h3>
             <p className="text-xs text-muted-foreground mt-1">
